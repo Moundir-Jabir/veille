@@ -1,6 +1,8 @@
 <?php
     session_start();
     $status = "";
+
+    $cookieEmail = $_COOKIE['email'] ?? "";
 ?>
 
 <?php
@@ -10,12 +12,17 @@
     if($_SERVER['REQUEST_METHOD'] === 'POST'){
         $email = htmlspecialchars($_POST['email']) ?? "";
         $password = htmlspecialchars($_POST['password']) ?? "";
+        $check = $_POST['check'] ?? "";
         if(authenticate($email,$password)){
             $_SESSION['email'] = $email;
-            header("Location: admin.php"); // redirection
-            die();
+            if($check == "on"){
+                setcookie("email", $email, time()+3600*48);
+            }else{
+                setcookie("email"); // effacer la cookie
+            }
+            header("Location: admin.php");
         }else{
-            $status = "vérifier vos infos !!";
+            $status = "email ou mot de passe incorect !!";
         }
     }
 
@@ -44,11 +51,15 @@
                 <form action="" method="POST">
                     <div class="form-group">
                         <label for="email">email</label>
-                        <input required name="email" id="email" type="email" class="form-control">
+                        <input required name="email" id="email" value="<?php echo $cookieEmail; ?>" type="email" class="form-control">
                     </div>
                     <div class="form-group">
                         <label for="password">password</label>
                         <input required name="password" id="password" type="password" class="form-control">
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" checked name="check" role="switch" id="flexSwitchCheckDefault">
+                        <label class="form-check-label" for="flexSwitchCheckDefault">Enregistrer les informations de connexion</label>
                     </div>
                     <input type="submit" value="Login" class="btn btn-danger btn-block">
                 </form>
